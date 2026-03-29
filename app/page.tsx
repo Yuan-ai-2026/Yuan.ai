@@ -66,22 +66,46 @@ export default function Home() {
   const [data, setData] = useState<AnalysisData[] | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 4. 异步获取数据（如果有后端API，后续把这里改成请求多品种数据）
-  const fetchData = async () => {
-    try {
-      // 这里暂时用兜底数据，后续替换成你的API地址
-      // const res = await fetch('你的后端API地址，返回多品种数据');
-      // const result = await res.json();
-      // setData(result);
-      setData(fallbackData); // 先用兜底数据展示
-    } catch (err) {
-      console.error("API调用失败，使用兜底数据：", err);
-      setData(fallbackData); // 失败时显示兜底数据
-    } finally {
-      setLoading(false);
-    }
-  };
+ // 4. 异步获取数据（已修改：接入真实API + 调试日志）
+const fetchData = async () => {
+  try {
+    // 👇 替换成你的 Render 后端 API 真实地址！！！
+    const apiUrl = 'https://你的后端API地址.onrender.com/api/analysis';
+    console.log("开始请求API:", apiUrl);
 
+    // 发起API请求（添加跨域/超时配置）
+    const res = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      timeout: 10000, // 超时时间10秒
+    });
+
+    // 检查API响应是否成功
+    if (!res.ok) {
+      throw new Error(`API响应失败：状态码 ${res.status} ${res.statusText}`);
+    }
+
+    // 解析API返回的JSON数据
+    const result = await res.json();
+    console.log("API返回数据:", result); // 打印真实数据，方便调试
+
+    // 验证数据格式是否正确（避免后端返回格式错误）
+    if (Array.isArray(result) && result.length > 0) {
+      setData(result); // 使用真实API数据
+    } else {
+      throw new Error("API返回数据格式错误（不是数组/为空）");
+    }
+
+  } catch (err) {
+    // 打印错误日志，方便定位问题
+    console.error("API调用失败，使用兜底数据：", err);
+    setData(fallbackData); // 失败时用兜底数据
+  } finally {
+    setLoading(false);
+  }
+};
   // 页面加载时执行数据请求
   useEffect(() => {
     fetchData();
