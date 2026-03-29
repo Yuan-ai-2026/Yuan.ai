@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'AI 交易分析仪表盘',
+  title: 'YuanTrader',
   description: 'AI-powered trading analysis dashboard',
 };
 
